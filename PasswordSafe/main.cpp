@@ -71,7 +71,7 @@ void installPasswordSafe(){
 	}
 	
 	// make directory & build executable in it
-	sprintf(toSystem, "mkdir $HOME/PasswordSafe && cd $HOME/PasswordSafe && curl -o pwdSafe.cpp TODO:GETTHERAWADDRESS && g++ pwdSafe.cpp -std=c++11 -o PasswordSafe && rm -f pwdSafe.cpp && touch passwords.txt");
+	sprintf(toSystem, "mkdir $HOME/PasswordSafe && cd $HOME/PasswordSafe && curl -o pwdSafe.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ pwdSafe.cpp -std=c++11 -o PasswordSafe && rm -f pwdSafe.cpp && touch passwords.txt");
 	system(toSystem);
 	
 	sprintf(toSystem, "echo \"Hit any key to add PasswordSafe to your path or c to cancel\n\"");
