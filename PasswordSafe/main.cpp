@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void installPasswordSafe();
+int installPasswordSafe();
 void encryptPasswords();
 void decryptPasswords();
 
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]){
 }
 
 
-void installPasswordSafe(){
+int installPasswordSafe(){
 	
 	char toSystem[4096];
 	char userIn;
@@ -87,7 +87,7 @@ void installPasswordSafe(){
 	
 	if( userIn == 'q' || userIn == 'Q' ){
 		cout << "Installation aborted. Have a nice day." << endl << endl;
-		return;
+		return 8;
 	}
 	else{
 		sprintf(toSystem, "echo \"Installing PasswordSafe in $HOME/PasswordSafe/\"");
@@ -95,7 +95,7 @@ void installPasswordSafe(){
 	}
 	
 	// make directory & build executable in it
-	sprintf(toSystem, "mkdir $HOME/PasswordSafe && cd $HOME/PasswordSafe && curl -o pwdSafe.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ pwdSafe.cpp -std=c++11 -o PasswordSafe && rm -f pwdSafe.cpp && echo \"______________Password Safe______________\" > passwords.txt && echo \"\" >> passwords.txt");
+	sprintf(toSystem, "mkdir $HOME/PasswordSafe && cd $HOME/PasswordSafe && curl -o pwdSafe.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ pwdSafe.cpp -std=c++11 -o PasswordSafe && rm -f pwdSafe.cpp && echo \"________________Password Safe________________\n\nUse the down arrow to get to this line. Then\npress Ctrl+k. The line should have vanished.\nDo the same for the rest and then type what\nyou would like to see when you open the safe.\nFor example\n\nBank\nuname: jt25257\npword: 123password!@#\nsec question: favorite food\nanswer: porked chops\n\nEmail\nuname: jthompson52752@web.net\npword: 321password#@!\n\nInternet\nweb:  https://some.address.com/login\nuname: jt123\npword: mypassword123@456\nPIN:  123123\n\nEdit this file to suit your needs. When\nyou're done, hit Ctrl+o to save or 'write out'\nthe file. You'll be prompted (at the bottom)\nfor what file name to write. It should already\nread $HOME/PasswordSafe/passwords.txt\nat the bottom (it will, don't worry).\nThen hit Enter (or Return, keyboard depending).\nThat will save all the changes you made.\nTo exit, hit Ctrl+x.\" > passwords.txt");
 	system(toSystem);
 	
 	
@@ -127,6 +127,10 @@ void installPasswordSafe(){
 	
 	encryptPasswords();
 	
+	sprintf(toSystem, "echo \"Installation successful! If you chose to add PasswordSafe to your path, run the command 'PasswordSafe' from your terminal. Otherwise, run '$HOME/PasswordSafe/PasswordSafe'. You will be asked what you'd like to do. Choose 2 to add your passwords to the safe.\"");
+	system(toSystem);
+	
+	return 0;
 }
 
 
