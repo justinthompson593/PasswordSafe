@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6C16ACAB1F57B51000E2A6B4 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C16ACAA1F57B51000E2A6B4 /* main.cpp */; };
+		6CA604A51F63A85B00E09831 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 6CA604A41F63A85B00E09831 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		6C16ACA71F57B50F00E2A6B4 /* PasswordSafe */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PasswordSafe; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C16ACAA1F57B51000E2A6B4 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		6CA604A41F63A85B00E09831 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +43,7 @@
 		6C16AC9E1F57B50F00E2A6B4 = {
 			isa = PBXGroup;
 			children = (
+				6CA604A41F63A85B00E09831 /* README.md */,
 				6C16ACA91F57B50F00E2A6B4 /* PasswordSafe */,
 				6C16ACA81F57B50F00E2A6B4 /* Products */,
 			);
@@ -120,6 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6CA604A51F63A85B00E09831 /* README.md in Sources */,
 				6C16ACAB1F57B51000E2A6B4 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -251,6 +255,7 @@
 				6C16ACB01F57B51000E2A6B4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
