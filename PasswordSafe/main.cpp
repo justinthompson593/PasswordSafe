@@ -83,7 +83,13 @@ void installPasswordSafe(){
 	system(toSystem);
 	
 	if( userIn != 'c' && userIn != 'C' ){
-		
+#if defined(__APPLE__) && defined(__MACH__)
+		sprintf(toSystem, "echo \"export PATH=$PATH:$HOME/PasswordSafe\" >> $HOME/.bash_profile");
+		system(toSystem);
+#elif defined(__unix__) || defined(__linux__)
+		sprintf(toSystem, "echo \"export PATH=$PATH:$HOME/PasswordSafe\" >> $HOME/.bashrc");
+		system(toSystem);
+#endif
 	}
 }
 
