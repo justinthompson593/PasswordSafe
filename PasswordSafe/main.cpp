@@ -13,6 +13,10 @@
 using namespace std;
 
 void installPasswordSafe();
+void encryptPasswords();
+void decryptPasswords();
+
+
 
 int main(int argc, char* argv[]){
 	// Check for install flag, install & return if it's 1st arg
@@ -94,7 +98,20 @@ void installPasswordSafe(){
 }
 
 
+void decryptPasswords(){
+	char sysBuf[4096];
+	sprintf(sysBuf, "gpg passwords.txt.gpg");
+	system(sysBuf);
+}
 
+void encryptPasswords(){
+	char sysBuf[4096];
+	sprintf(sysBuf, "rm passwords.txt.gpg");
+	system(sysBuf);
+	
+	sprintf(sysBuf, "gpg -c --cipher-algo AES256 passwords.txt && rm passwords.txt");
+	system(sysBuf);
+}
 
 
 
