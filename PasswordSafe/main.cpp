@@ -40,23 +40,27 @@ int main(int argc, char* argv[]){
 	cout << "1. Open safe to see passwords" << endl;
 	cout << "2. Add a password to safe" << endl;
 	
-	string usrIn;
-	cin >> usrIn;
+//	string usrIn;
+//	cin >> usrIn;
+	sprintf(toSystem, "stty raw");
+	system(toSystem);
+	char usrIn = getchar();
+	sprintf(toSystem, "stty cooked");
+	system(toSystem);
 	
-	switch (stoi(usrIn)) {
-  case 1:
+	switch (usrIn) {
+  case '1':
 		{
-//			sprintf(toSystem, "gpg $HOME/PasswordSafe/passwords.txt.gpg && echo \"$(<$HOME/PasswordSafe/passwords.txt)\" && rm -f $HOME/PasswordSafe/passwords.txt");
 			string pwd = getGpgPassword();
-			sprintf(toSystem, "gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg", pwd.c_str());
+			sprintf(toSystem, "clear && gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg", pwd.c_str());
 			system(toSystem);
 		}
 			break;
-  case 2:
+  case '2':
 		{
 //			sprintf(toSystem, "gpg $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt");
 			string pwd = getGpgPassword();
-			sprintf(toSystem, "gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", pwd.c_str(), pwd.c_str());
+			sprintf(toSystem, "clear && gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && rm $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", pwd.c_str(), pwd.c_str());
 			system(toSystem);
 		}
 			break;
