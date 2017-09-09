@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fstream>
+#include <termios.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -17,14 +19,29 @@ void encryptPasswords();
 void decryptPasswords();
 
 string getGpgPassword(){
+	
 	string out;
 	cout << "Enter your passphrase (the one I said to never EVER forget): ";
-	cin >> out;
+	
+	
+	
+	termios oldt;
+	tcgetattr(STDIN_FILENO, &oldt);
+	termios newt = oldt;
+	newt.c_lflag &= ~ECHO;
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	
+	getline(cin, out);
+	
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore terminal state
+	
+	cout << endl;
 	return out;
 }
 
 
 int main(int argc, char* argv[]){
+	
 	// Check for install flag, install & return if it's 1st arg
 	if(argc == 2){
 		if( strncmp(argv[1], "--install", 9) == 0 ){
@@ -33,12 +50,15 @@ int main(int argc, char* argv[]){
 		}
 	}
 	
+	string password = getGpgPassword();
 	
 	char toSystem[4096];
 	
 	cout << "What would you like to do?" << endl;
-	cout << "1. Open safe to see passwords" << endl;
-	cout << "2. Add a password to safe" << endl;
+	cout << "1. Open safe to see all passwords" << endl;
+	cout << "2. Get the password for a specific entry" << endl;
+	cout << "3. Edit passwords.txt with nano" << endl;
+	
 	
 //	string usrIn;
 //	cin >> usrIn;
@@ -50,23 +70,30 @@ int main(int argc, char* argv[]){
 	
 	switch (usrIn) {
   case '1':
-		{
-			string pwd = getGpgPassword();
-			sprintf(toSystem, "clear && gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg", pwd.c_str());
+		{	// print entire passwords.txt with batch
+			sprintf(toSystem, "clear && gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg", password.c_str());
 			system(toSystem);
 		}
 			break;
   case '2':
 		{
-//			sprintf(toSystem, "gpg $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt");
-			string pwd = getGpgPassword();
-			sprintf(toSystem, "clear && gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && rm $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", pwd.c_str(), pwd.c_str());
+			string srchQ;
+			cout << "Enter the title of the password entry: ";
+			cin >> srchQ;
+			sprintf(toSystem, "echo \"$(gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg)\" | sed -n '/%s/,/^$/p'", password.c_str(), srchQ.c_str());
+			system(toSystem);
+		}
+			break;
+  case '3':
+		{
+			sprintf(toSystem, "clear && gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && rm $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", password.c_str(), password.c_str());
 			system(toSystem);
 		}
 			break;
   default:
 			break;
 	}
+	
 	
 	return 0;
 }
@@ -95,7 +122,7 @@ int installPasswordSafe(){
 	}
 	
 	// make directory & build executable in it
-	sprintf(toSystem, "mkdir $HOME/PasswordSafe && cd $HOME/PasswordSafe && curl -o pwdSafe.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ pwdSafe.cpp -std=c++11 -o PasswordSafe && rm -f pwdSafe.cpp && echo \"________________Password Safe________________\n\nUse the down arrow to get to this line. Then\npress Ctrl+k. The line should have vanished.\nDo the same for the rest and then type what\nyou would like to see when you open the safe.\nFor example\n\nBank\nuname: jt25257\npword: 123password!@#\nsec question: favorite food\nanswer: porked chops\n\nEmail\nuname: jthompson52752@web.net\npword: 321password#@!\n\nInternet\nweb:  https://some.address.com/login\nuname: jt123\npword: mypassword123@456\nPIN:  123123\n\nEdit this file to suit your needs. When\nyou're done, hit Ctrl+o to save or 'write out'\nthe file. You'll be prompted (at the bottom)\nfor what file name to write. It should already\nread $HOME/PasswordSafe/passwords.txt\nat the bottom (it will, don't worry).\nThen hit Enter (or Return, keyboard depending).\nThat will save all the changes you made.\nTo exit, hit Ctrl+x.\" > passwords.txt");
+	sprintf(toSystem, "mkdir $HOME/PasswordSafe && cd $HOME/PasswordSafe && curl -o pwdSafe.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ pwdSafe.cpp -std=c++11 -o PasswordSafe && rm -f pwdSafe.cpp && echo \"________________Password Safe________________\n\" > passwords.txt");
 	system(toSystem);
 	
 	
