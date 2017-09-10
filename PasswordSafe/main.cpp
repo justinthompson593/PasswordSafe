@@ -72,10 +72,11 @@ MENU:
 	
 	cout << endl << "What would you like to do?" << endl;
 	cout << "1. Open safe to see all passwords" << endl;
-	cout << "2. Print information for a specific title" << endl;
-	cout << "3. Copy password from a specific title" << endl;
-	cout << "4. Add passwords to the safe" << endl;
-	cout << "5. Edit passwords.txt with nano" << endl;
+	cout << "2. Print titles" << endl;
+	cout << "3. Print information for a specific title" << endl;
+	cout << "4. Copy password from a specific title" << endl;
+	cout << "5. Add passwords to the safe" << endl;
+	cout << "6. Edit passwords.txt with nano" << endl;
 	
 	cout << endl << "Enter a number (1-5) or q to quit: ";
 	cin >> userIn;
@@ -92,12 +93,14 @@ MENU:
 			break;
   case 2:
 		{
-			
+			sprintf(toSystem, "echo \"$(gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg)\" | sed -n '/^$/{n;p;}'", password.c_str());
+			system(toSystem);
+			goto MENU;
 		}
   case 3:
 		{
 			string srchQ;
-			cout << "Enter the title of the password entry: ";
+			cout << "Enter the title: ";
 			cin >> srchQ;
 			sprintf(toSystem, "echo \"$(gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg)\" | sed -n '/%s/,/^$/p'", password.c_str(), srchQ.c_str());
 			system(toSystem);
@@ -106,11 +109,41 @@ MENU:
 			break;
   case 4:
 		{
-			addPasswords(password);
+			string srchQ;
+			cout << "Enter the title: ";
+			cin >> srchQ;
+			sprintf(toSystem, "echo \"$(gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg)\" | sed -n '/%s/,/^$/p' > thisTitlesInfo", password.c_str(), srchQ.c_str());
+			system(toSystem);
+			
+			ifstream infoFile("thisTitlesInfo");
+			string line;
+			while( getline(infoFile, line) ){
+				if( line.compare(0,5,"pword") == 0 ){
+					unsigned long idx = line.find(" ");
+//					cout << "Your password should be " << line.substr(idx+1) << endl;
+#if defined(__APPLE__) && defined(__MACH__)
+					sprintf(toSystem, "printf %s | pbcopy", line.substr(idx+1).c_str());
+					system(toSystem);
+#elif defined(__unix__) || defined(__linux__)
+					sprintf(toSystem, "printf %s > pwdSafeTemp && xsel --clipboard < pwdSafeTemp && rm -f pwdSafeTemp", line.substr(idx+1).c_str());
+					system(toSystem);
+#endif
+					cout << endl << "Password for " << srchQ << " copied to clipboard" << endl;
+				}
+			}
+			infoFile.close();
+			sprintf(toSystem, "rm -f thisTitlesInfo");
+			system(toSystem);
 			goto MENU;
 		}
 			break;
   case 5:
+		{
+			addPasswords(password);
+			goto MENU;
+		}
+			break;
+  case 6:
 		{
 			sprintf(toSystem, "clear && gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && rm $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", password.c_str(), password.c_str());
 			system(toSystem);
