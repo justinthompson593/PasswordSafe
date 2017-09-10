@@ -9,7 +9,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <string.h>
-
+#include <algorithm>
 #include <termios.h>
 #include <unistd.h>
 
