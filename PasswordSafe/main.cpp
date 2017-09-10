@@ -6,9 +6,10 @@
 //  Copyright © 2017 Justin Thompson. All rights reserved.
 //
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <string.h>
-#include <fstream>
+
 #include <termios.h>
 #include <unistd.h>
 
@@ -17,6 +18,7 @@ using namespace std;
 int installPasswordSafe();
 void encryptPasswords();
 void decryptPasswords();
+void addPasswords(string pWord);
 
 string getGpgPassword(){
 	
@@ -39,6 +41,17 @@ string getGpgPassword(){
 	return out;
 }
 
+string password;
+char toSystem[4096];
+char usrIn;
+string userIn;
+
+// From https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c#4654718
+bool is_number(const std::string& s)
+{
+	return !s.empty() && std::find_if(s.begin(),
+									  s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
 
 int main(int argc, char* argv[]){
 	
@@ -49,48 +62,65 @@ int main(int argc, char* argv[]){
 			return 0;
 		}
 	}
+
+
+	password = getGpgPassword();
 	
-	string password = getGpgPassword();
 	
-	char toSystem[4096];
 	
-	cout << "What would you like to do?" << endl;
+MENU:
+	
+	cout << endl << "What would you like to do?" << endl;
 	cout << "1. Open safe to see all passwords" << endl;
-	cout << "2. Get the password for a specific entry" << endl;
-	cout << "3. Edit passwords.txt with nano" << endl;
+	cout << "2. Print information for a specific title" << endl;
+	cout << "3. Copy password from a specific title" << endl;
+	cout << "4. Add passwords to the safe" << endl;
+	cout << "5. Edit passwords.txt with nano" << endl;
 	
+	cout << endl << "Enter a number (1-5) or q to quit: ";
+	cin >> userIn;
 	
-//	string usrIn;
-//	cin >> usrIn;
-	sprintf(toSystem, "stty raw");
-	system(toSystem);
-	char usrIn = getchar();
-	sprintf(toSystem, "stty cooked");
-	system(toSystem);
+
 	
-	switch (usrIn) {
-  case '1':
+	switch (is_number(userIn) ? stoi(userIn) : 0) {
+  case 1:
 		{	// print entire passwords.txt with batch
 			sprintf(toSystem, "clear && gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg", password.c_str());
 			system(toSystem);
+			goto MENU;
 		}
 			break;
-  case '2':
+  case 2:
+		{
+			
+		}
+  case 3:
 		{
 			string srchQ;
 			cout << "Enter the title of the password entry: ";
 			cin >> srchQ;
 			sprintf(toSystem, "echo \"$(gpg --decrypt --batch --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg)\" | sed -n '/%s/,/^$/p'", password.c_str(), srchQ.c_str());
 			system(toSystem);
+			goto MENU;
 		}
 			break;
-  case '3':
+  case 4:
+		{
+			addPasswords(password);
+			goto MENU;
+		}
+			break;
+  case 5:
 		{
 			sprintf(toSystem, "clear && gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && rm $HOME/PasswordSafe/passwords.txt.gpg && nano $HOME/PasswordSafe/passwords.txt && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", password.c_str(), password.c_str());
 			system(toSystem);
+			goto MENU;
 		}
 			break;
   default:
+		{
+			cout << "Quitting PasswordSafe." << endl;
+		}
 			break;
 	}
 	
@@ -176,5 +206,74 @@ void encryptPasswords(){
 	system(sysBuf);
 }
 
+void addPasswords(string pWord){
+	string uIn;
+	
+	char sysBuf[2048];
+	sprintf(sysBuf, "gpg --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt.gpg && echo $HOME/PasswordSafe/passwords.txt > PwdSafePathAndFile", pWord.c_str());
+	system(sysBuf);
+	
+	ifstream pathIn("PwdSafePathAndFile");
+	string PathAndFile((istreambuf_iterator<char>(pathIn)),istreambuf_iterator<char>());
+	PathAndFile = PathAndFile.substr(0,PathAndFile.length()-1);
+	
+	fstream pwds;
+	pwds.open(PathAndFile.c_str(), ios::app);
+	
+	bool keepGoing = true;
+	while(keepGoing){
+	
+		if(pwds.is_open()){
+			cout << "Enter a one-word title for this password (first-gmail, NewBank, phone): ";
+			cin >> uIn;
+			string thisTitle = uIn;
+			pwds << uIn << endl;
+			cout << endl << "Enter your username (it may be an email in some cases): ";
+			cin >> uIn;
+			pwds << "uname: " << uIn << endl;
+			cout << endl << "Enter your password: ";
+			cin >> uIn;
+			pwds << "pword: " << uIn << endl;
+			
+			cout << endl << "Would you like to add info to "<<  thisTitle << "? (i.e. a PIN #, security question, website) Enter y to add info or any other key to complete " << thisTitle << ": ";
+			cin >> uIn;
+			
+			while( uIn.compare("y") == 0 ){
+				cout << endl << "Enter a one-word label to appear under " << thisTitle << " (i.e. PIN, sec-question, Website, Contact_Name): ";
+				cin >> uIn;
+				pwds << uIn << ": ";
+				cout << endl << "Enter the note to follow " << uIn << ". If there are multiple words, separate them-with-dashes or_with_subs): ";
+				cin >> uIn;
+				pwds << uIn << endl;
+				
+				
+				cout << endl << "Enter y to add more info or any other key to complete " << thisTitle << ": ";
+				cin >> uIn;
+			}
+			pwds << endl;
+			
+			cout << "Enter y to add another password to the safe or any other key to quit: ";
+			cin >> uIn;
+			if( uIn.compare("y") != 0 )
+				keepGoing = false;
+			
+			cout << endl;
+		}
+		else{
+			cout << "Could not open passwords.txt. You may have entered an invalid password." << endl;
+			keepGoing = false;
+		}
+	
+	}
+	pwds.close();
+	
+	
+	
+	sprintf(sysBuf, "rm -f PwdSafePathAndFile 2> /dev/null");
+	system(sysBuf);
+	
+	sprintf(sysBuf, "rm $HOME/PasswordSafe/passwords.txt.gpg 2> /dev/null && gpg -c --cipher-algo AES256 --passphrase \"%s\" $HOME/PasswordSafe/passwords.txt && rm $HOME/PasswordSafe/passwords.txt", pWord.c_str());
+	system(sysBuf);
+}
 
 
