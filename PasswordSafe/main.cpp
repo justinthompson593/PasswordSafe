@@ -143,7 +143,7 @@ MENU:
 
 int updatePasswordSafe(){
 	char toSystem[2048];
-	sprintf(toSystem, "cd $HOME/PasswordSafe/PasswordSafe && curl -o update.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ update.cpp -std=c++11 -o PasswordSafe && rm -f update.cpp && echo \"\n\nUpdate successful! You are now using the newest version of PasswordSafe.\n\"");
+	sprintf(toSystem, "cd $HOME/PasswordSafe && curl -o update.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ update.cpp -std=c++11 -o PasswordSafe && rm -f update.cpp && echo \"\n\nUpdate successful! You are now using the newest version of PasswordSafe.\n\"");
 	system(toSystem);
 	
 	return 0;
@@ -205,7 +205,7 @@ int installPasswordSafe(){
 	
 	encryptPasswords();
 	
-	sprintf(toSystem, "echo \"Installation successful! If you chose to add PasswordSafe to your path, run the command 'PasswordSafe' from your terminal. Otherwise, run '$HOME/PasswordSafe/PasswordSafe'. You will be asked what you'd like to do. Choose 2 to add your passwords to the safe.\"");
+	sprintf(toSystem, "echo \"Installation successful! If you chose to add PasswordSafe to your path, you'll need to close this terminal and open a new one. Then run the command 'PasswordSafe' from your terminal. Otherwise, run '$HOME/PasswordSafe/PasswordSafe'.\"");
 	system(toSystem);
 	
 	return 0;
