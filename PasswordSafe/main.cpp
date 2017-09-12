@@ -22,6 +22,7 @@ void decryptPasswords();
 void addPasswords(string pWord);
 string getGpgPassword();
 bool is_number(const string & s);
+string processPassword(string pWord);
 
 
 string password;
@@ -316,6 +317,14 @@ string getGpgPassword(){
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore terminal state
 	
 	cout << endl;
+	
+	// Process password:   $ --> \$   for bash strings
+	size_t idx = out.find("$");
+	if( idx != string::npos ){
+		out.insert(idx, "\\");
+	}
+	
+	
 	return out;
 }
 
