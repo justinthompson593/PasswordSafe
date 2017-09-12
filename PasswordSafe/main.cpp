@@ -16,50 +16,30 @@
 using namespace std;
 
 int installPasswordSafe();
+int updatePasswordSafe();
 void encryptPasswords();
 void decryptPasswords();
 void addPasswords(string pWord);
+string getGpgPassword();
+bool is_number(const string & s);
 
-string getGpgPassword(){
-	
-	string out;
-	cout << "Enter your passphrase (the one I said to never EVER forget): ";
-	
-	
-	
-	termios oldt;
-	tcgetattr(STDIN_FILENO, &oldt);
-	termios newt = oldt;
-	newt.c_lflag &= ~ECHO;
-	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-	
-	getline(cin, out);
-	
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore terminal state
-	
-	cout << endl;
-	return out;
-}
 
 string password;
 char toSystem[4096];
 char usrIn;
 string userIn;
 
-// From https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c#4654718
-bool is_number(const std::string& s)
-{
-	return !s.empty() && std::find_if(s.begin(),
-									  s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
-}
 
 int main(int argc, char* argv[]){
 	
 	// Check for install flag, install & return if it's 1st arg
 	if(argc == 2){
 		if( strncmp(argv[1], "--install", 9) == 0 ){
-			installPasswordSafe();
-			return 0;
+			return installPasswordSafe();
+		}
+		
+		if( strncmp(argv[1], "--update", 8) == 0 ){
+			return updatePasswordSafe();
 		}
 	}
 
@@ -157,6 +137,14 @@ MENU:
 			break;
 	}
 	
+	
+	return 0;
+}
+
+int updatePasswordSafe(){
+	char toSystem[2048];
+	sprintf(toSystem, "cd $HOME/PasswordSafe/PasswordSafe && curl -o update.cpp https://raw.githubusercontent.com/justinthompson593/PasswordSafe/master/PasswordSafe/main.cpp && g++ update.cpp -std=c++11 -o PasswordSafe && rm -f update.cpp && echo \"\n\nUpdate successful! You are now using the newest version of PasswordSafe.\n\"");
+	system(toSystem);
 	
 	return 0;
 }
@@ -310,3 +298,30 @@ void addPasswords(string pWord){
 }
 
 
+string getGpgPassword(){
+	
+	string out;
+	cout << "Enter your passphrase (the one I said to never EVER forget): ";
+	
+	
+	
+	termios oldt;
+	tcgetattr(STDIN_FILENO, &oldt);
+	termios newt = oldt;
+	newt.c_lflag &= ~ECHO;
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	
+	getline(cin, out);
+	
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore terminal state
+	
+	cout << endl;
+	return out;
+}
+
+
+// From https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c#4654718
+bool is_number(const string& s)
+{
+	return !s.empty() && find_if(s.begin(), s.end(), [](char c) { return !isdigit(c); }) == s.end();
+}
