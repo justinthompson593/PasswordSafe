@@ -21,8 +21,62 @@ void encryptPasswords();
 void decryptPasswords();
 void addPasswords(string pWord);
 string getGpgPassword();
+void processBashString(string &str);
+
+void processBashString(string &str, unsigned long strLength){
+	// Process password:   $ --> \$ , ! --> \! , ...  for bash strings
+	
+	unsigned long newLength = strLength;
+	int idx = 0;
+	while( idx < newLength ){
+		
+		if( str.at(idx) == '$' ){
+			str.insert(idx, "\\");
+			newLength++;
+			idx++;
+		}
+		if( str.at(idx) == '!' ){
+			str.insert(idx, "\\");
+			newLength++;
+			idx++;
+		}
+		if( str.at(idx) == ';' ){
+			str.insert(idx, "\\");
+			newLength++;
+			idx++;
+		}
+		
+		idx++;
+	}
+	
+	
+//	cout << "String length: " << str.length() << endl;
+//	for(int i=0; i<strLength; i++){
+//		cout << "iteration " << i << endl;
+//		if( str.at(i) == '$' ){
+//			str.insert( i, "\\");
+//		}
+//	}
+	
+//	size_t idx = str.find("$");
+//	while( idx != string::npos ){
+//		cout << "Searching " << str.substr(idx) << endl;
+//		str.insert(idx, "\\");
+//		idx = str.find("$", idx+1);
+//		cout << "idx: " << idx << endl;
+//	}
+//	idx = str.find("!");
+//	if( idx != string::npos ){
+//		str.insert(idx, "\\");
+//	}
+//	idx = str.find(";");
+//	if( idx != string::npos ){
+//		str.insert(idx, "\\");
+//	}
+	
+}
+
 bool is_number(const string & s);
-string processPassword(string pWord);
 
 
 string password;
@@ -304,8 +358,7 @@ string getGpgPassword(){
 	string out;
 	cout << "Enter your passphrase (the one I said to never EVER forget): ";
 	
-	
-	
+	// Change terminal to not show user input
 	termios oldt;
 	tcgetattr(STDIN_FILENO, &oldt);
 	termios newt = oldt;
@@ -318,12 +371,7 @@ string getGpgPassword(){
 	
 	cout << endl;
 	
-	// Process password:   $ --> \$   for bash strings
-	size_t idx = out.find("$");
-	if( idx != string::npos ){
-		out.insert(idx, "\\");
-	}
-	
+	processBashString(out, out.length());
 	
 	return out;
 }
